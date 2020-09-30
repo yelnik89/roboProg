@@ -29,9 +29,17 @@ namespace roboProg
         {
             using (FileStream file = new FileStream(LOGFILE, FileMode.Append))
             {
-                byte[] array = Encoding.Default.GetBytes(text + '\n');
+                byte[] array = prepareText(text);
                 file.Write(array, 0, array.Length);
             }
+        }
+
+        private byte[] prepareText(string text)
+        {
+            string s = DateTime.Now.ToString();
+            s += ": " + text + '\n';
+            byte[] array = Encoding.Default.GetBytes(s);
+            return array;
         }
     }
 }

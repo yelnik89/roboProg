@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 
 namespace roboProg
@@ -16,6 +17,7 @@ namespace roboProg
     {
         private bool teamCyclicalRun = false;
         private string teamName;
+        private int indexOfSelectedThing;
         private AllThingsJson.Rootobject allThings;
         private Dictionary<string, string>[] thingsPropertyInServer;
         private Dictionary<string, string>[] thingsPropertyInPolygon;
@@ -224,8 +226,11 @@ namespace roboProg
         #endregion
 
         #region cyclical functions
+
+        #region data transfer
         private void TeamStart_Click(object sender, RoutedEventArgs e)
         {
+            log("start " + TeamStart.Content);
             if (checkFields())
             {
                 if (this.teamCyclicalRun) stopTeamCicleRequest();
@@ -272,6 +277,7 @@ namespace roboProg
             {
                 sendUDP(thing, indexOfThing);
                 sendPropertyToServer(messenger, indexOfThing);
+                fullingPropertyView();
             }
         }
 
@@ -320,6 +326,44 @@ namespace roboProg
             if (Pace.Text.Length == 0) return 0;
             else return int.Parse(Pace.Text);
         }
+        #endregion
+
+        #region view property
+        private void TeamThingsList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            this.indexOfSelectedThing = TeamThingsList.SelectedIndex;
+            if (this.teamCyclicalRun)
+            {
+                fullingPropertyView();
+            }
+            
+        }
+
+        private void fullingPropertyView()
+        {
+            paramFieldClin();
+            showProperty(PropertyInServiceViews, thingsPropertyInServer[indexOfSelectedThing]);
+            showProperty(PropertyInPolygonViews, thingsPropertyInPolygon[indexOfSelectedThing]);
+        }
+
+        private void showProperty(RichTextBox propertyView, Dictionary<string, string> thingProperty)
+        {
+            string dataToWrite;
+            foreach (KeyValuePair<string, string> property in thingProperty)
+            {
+                dataToWrite = property.Key + " : " + property.Value + Environment.NewLine;
+                propertyView.AppendText(dataToWrite);
+            }
+        }
+
+        private void paramFieldClin()
+        {
+            SelectedThingName.Text = null;
+            PropertyInServiceViews.Document = null;
+            PropertyInPolygonViews.Document = null;
+        }
+        #endregion
+
         #endregion
 
         #region address

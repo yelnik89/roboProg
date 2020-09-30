@@ -8,35 +8,41 @@
         Title="MainWindow" Height="537" Width="1204">
     <Grid Background="#FFF0F0F0" Margin="0,0,2,-1">
         <Label x:Name="LoginLabel" Content="Логин" HorizontalAlignment="Left" Margin="10,19,0,0" VerticalAlignment="Top" Width="47" RenderTransformOrigin="0.532,0.615"/>
-        <TextBox x:Name="Login" HorizontalAlignment="Left" Height="22" Margin="62,22,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="178" BorderBrush="#FF7A7A7A" Background="White"/>
+        <TextBox x:Name="Login" HorizontalAlignment="Left" Height="19" Margin="62,22,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="178" BorderBrush="#FF7A7A7A" Background="White"/>
         <Label x:Name="PasswordLabel" Content="Пароль" HorizontalAlignment="Left" Margin="250,19,0,0" VerticalAlignment="Top" Width="55" Height="25"/>
-        <PasswordBox x:Name="Password" HorizontalAlignment="Left" Margin="310,22,0,0" VerticalAlignment="Top" Width="237" Height="22" BorderBrush="#FF738096"/>
+        <PasswordBox x:Name="Password" HorizontalAlignment="Left" Margin="310,22,0,0" VerticalAlignment="Top" Width="237" Height="19" BorderBrush="#FF738096"/>
         <Label x:Name="KeyLabel" Content="Ключ" HorizontalAlignment="Left" Margin="10,55,0,0" VerticalAlignment="Top" Width="42"/>
-        <TextBox x:Name="AuthKey" HorizontalAlignment="Left" Height="22" Margin="62,57,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="253" BorderBrush="#FF7A7A7A" Background="White" MaxLines="40"/>
+        <TextBox x:Name="AuthKey" HorizontalAlignment="Left" Height="19" Margin="62,57,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="253" BorderBrush="#FF7A7A7A" Background="White" MaxLines="40"/>
         <Button x:Name="AllThingsButton" Content="отправить запрос" HorizontalAlignment="Left" Margin="327,57,0,0" VerticalAlignment="Top" Width="115" Height="22" Click="AllThingsButton_Click"/>
         <Button x:Name="MyIpButton" Content="запрос на myIP" HorizontalAlignment="Left" Margin="455,57,0,0" VerticalAlignment="Top" Width="92" Height="22"/>
         <Label x:Name="IPLabel" Content="IP:" HorizontalAlignment="Left" Margin="10,90,0,0" VerticalAlignment="Top" Width="25"/>
-        <TextBox x:Name="IP" HorizontalAlignment="Left" Height="22" Margin="35,94,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="100" BorderBrush="#FF7A7A7A" Background="White"/>
+        <TextBox x:Name="IP" HorizontalAlignment="Left" Height="19" Margin="35,94,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="100" BorderBrush="#FF7A7A7A" Background="White"/>
         <Label x:Name="IPLabel_Copy" Content="Порт:" HorizontalAlignment="Left" Margin="145,90,0,0" VerticalAlignment="Top" Width="40"/>
-        <TextBox x:Name="Port" HorizontalAlignment="Left" Height="22" Margin="185,94,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="55" BorderBrush="#FF7A7A7A" Background="White"/>
+        <TextBox x:Name="Port" HorizontalAlignment="Left" Height="19" Margin="185,94,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="55" BorderBrush="#FF7A7A7A" Background="White"/>
         <Label x:Name="AuthTypeLabel" Content="Тип авторизации" HorizontalAlignment="Left" Margin="327,90,0,0" VerticalAlignment="Top" Width="105"/>
         <ComboBox x:Name="AuthType" HorizontalAlignment="Left" Margin="437,94,0,0" VerticalAlignment="Top" Width="110" SelectedIndex="0" BorderBrush="#FF7A7A7A">
             <TextBlock>по ключу</TextBlock>
             <TextBlock>по логину</TextBlock>
         </ComboBox>
-        <RichTextBox x:Name="LogBox" Margin="10,160,0,10" BorderBrush="#FF7A7A7A" IsReadOnly="True" HorizontalAlignment="Left" Width="537" Background="#FFF0F0F0" TextOptions.TextFormattingMode="Display">
+        <RichTextBox x:Name="LogBox" Margin="10,160,0,10" BorderBrush="#FF7A7A7A" IsReadOnly="True" HorizontalAlignment="Left" Width="537" Background="#FFF9F9F9" TextOptions.TextFormattingMode="Display">
             <FlowDocument/>
         </RichTextBox>
         <Label x:Name="PaceLabel" Content="частота опроса в мс" HorizontalAlignment="Left" Margin="570,19,0,0" VerticalAlignment="Top" Width="125"/>
-        <TextBox x:Name="Pace" HorizontalAlignment="Left" Height="22" Margin="700,22,0,0" TextWrapping="Wrap" Text="1000" VerticalAlignment="Top" Width="45" BorderBrush="#FF738096"/>
+        <TextBox x:Name="Pace" HorizontalAlignment="Left" Height="18" Margin="700,23,0,0" TextWrapping="Wrap" Text="1000" VerticalAlignment="Top" Width="45" BorderBrush="#FF738096"/>
         <Button x:Name="TeamStart" Content="" HorizontalAlignment="Left" Margin="570,57,0,0" VerticalAlignment="Top" Width="175" Height="59" FontSize="24" IsEnabled="False" Click="TeamStart_Click"/>
         <Label x:Name="AllThingsListLabel" Content="Все предметы" HorizontalAlignment="Left" Margin="765,19,0,0" VerticalAlignment="Top" Width="120"/>
         <Label x:Name="TeamThingsLabel" Content="Предметы команды" HorizontalAlignment="Left" Margin="765,55,0,0" VerticalAlignment="Top" Width="120"/>
         <ComboBox x:Name="AllThingsList" HorizontalAlignment="Left" Margin="890,22,0,0" VerticalAlignment="Top" Width="180"/>
-        <ComboBox x:Name="TeamThingsList" HorizontalAlignment="Left" Margin="890,57,0,0" VerticalAlignment="Top" Width="180"/>
+        <ComboBox x:Name="TeamThingsList" HorizontalAlignment="Left" Margin="890,57,0,0" VerticalAlignment="Top" Width="180" SelectionChanged="TeamThingsList_SelectionChanged"/>
         <Button x:Name="Team1" Content="Team 1" HorizontalAlignment="Left" Margin="1095,22,0,0" VerticalAlignment="Top" Width="75" Height="22" Click="Team1_Click"/>
         <Label x:Name="ThingNameLabel" Content="Название предмета" HorizontalAlignment="Left" Margin="765,90,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="SelectedThingName" HorizontalAlignment="Left" Height="22" Margin="890,94,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" IsReadOnly="True"/>
+        <TextBox x:Name="SelectedThingName" HorizontalAlignment="Left" Height="19" Margin="890,94,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" IsReadOnly="True" BorderBrush="#FF7A7A7A"/>
+        <RichTextBox x:Name="PropertyInServiceViews" HorizontalAlignment="Left" Margin="765,160,0,10" Width="100" BorderBrush="#FF7A7A7A" IsReadOnly="True" Background="#FFF9F9F9">
+            <FlowDocument/>
+        </RichTextBox>
+        <RichTextBox x:Name="PropertyInPolygonViews" HorizontalAlignment="Left" Margin="890,160,0,10" Width="100" BorderBrush="#FF7A7A7A" IsReadOnly="True">
+            <FlowDocument/>
+        </RichTextBox>
 
     </Grid>
 </Window>
