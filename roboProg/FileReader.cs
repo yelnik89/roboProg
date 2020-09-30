@@ -65,5 +65,19 @@ namespace roboProg
             }
             return result;
         }
+
+        public string[] readAuthorizationFile()
+        {
+            string data;
+            string[] result = new string[5];
+            try
+            {
+                data = readFile("authorization");
+                string[] splitData = data.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < 5; i++) result[i] = splitData[i].Trim('\r');
+            }
+            catch { }
+            return result;
+        }
     }
 }

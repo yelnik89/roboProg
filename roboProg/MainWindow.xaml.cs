@@ -24,11 +24,38 @@ namespace roboProg
         private List<string[]> teamSettings;
         private RequestJson json;
 
+        #region Initialization
         public MainWindow()
         {
             InitializeComponent();
             this.json = new RequestJson();
+            authorization();
+            startListening();
+        }
 
+        private void authorization()
+        {
+            fullingAuthFields(getAuthData());
+        }
+
+        private string[] getAuthData()
+        {
+            FileReader reader = new FileReader();
+            string[] authdata = reader.readAuthorizationFile();
+            return authdata;
+        }
+
+        private void fullingAuthFields(string[] authdata)
+        {
+            AuthKey.Text = authdata[0];
+            IP.Text = authdata[1];
+            Port.Text = authdata[2];
+            Login.Text = authdata[3];
+            Password.Password = authdata[4];
+        }
+
+        private void startListening()
+        {
             Task startListening = new Task(cachListening);
             try
             {
@@ -39,6 +66,7 @@ namespace roboProg
                 log("resive from poligon ERROR:" + e.Message);
             }
         }
+        #endregion
 
         #region UDP Listening
         private void cachListening()
