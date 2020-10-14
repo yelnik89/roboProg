@@ -88,7 +88,7 @@ namespace roboProg
 
         private string getPropertyAddress(string name, string serviceName)
         {
-            string address = this.address + "/" + name + PROPERTY_URI + "/" + serviceName;
+            string address = this.address + name + PROPERTY_URI + serviceName;
             if (address.Equals("")) return "";
             log(address);
             return address;

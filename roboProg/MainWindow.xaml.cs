@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Controls;
 using System.Windows.Threading;
 
@@ -328,6 +329,7 @@ namespace roboProg
         private async Task property(Messenger messenger, string[] thing, int indexOfThing)
         {
             string json = await messenger.reqestToService(thing[4], thing[5]);
+            if (json.Equals("{}")) throw new Exception("нет данных");
             writeLogBox(json);
             this.thingsPropertyInServer[indexOfThing] = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
         }
@@ -387,8 +389,8 @@ namespace roboProg
         private void paramFieldClin()
         {
             SelectedThingName.Text = null;
-            PropertyInServiceViews.Document = null;
-            PropertyInPolygonViews.Document = null;
+            PropertyInServiceViews.Document = new FlowDocument();
+            PropertyInPolygonViews.Document = new FlowDocument();
         }
         #endregion
 
