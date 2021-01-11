@@ -109,6 +109,15 @@ namespace roboProg
             return result;
         }
 
+        private string trimer(string s)
+        {
+            s = s.Trim(' ');
+            s = s.Trim('\n');
+            s = s.Trim('#');
+            s = s.Trim(' ');
+            return s;
+        }
+
         private void preparationDataAndWrite(string[] data, string ip, string port)
         {
             int lenght = this.teamSettings.Count;
@@ -130,15 +139,6 @@ namespace roboProg
             {
                 this.thingsPropertyInPolygon[indexOfThing].Add(template[i - 2], data[i]);
             }
-        }
-
-        private string trimer(string s)
-        {
-            s = s.Trim(' ');
-            s = s.Trim('\n');
-            s = s.Trim('#');
-            s = s.Trim(' ');
-            return s;
         }
 
         private void writeUDPLog(string[] data)
@@ -359,7 +359,7 @@ namespace roboProg
         #endregion
 
         #region view property
-        private void TeamThingsList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void TeamThingsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             this.indexOfSelectedThing = TeamThingsList.SelectedIndex;
             if (this.teamCyclicalRun)
