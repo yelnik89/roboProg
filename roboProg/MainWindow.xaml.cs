@@ -24,12 +24,14 @@ namespace roboProg
         private Dictionary<string, string>[] thingsPropertyInPolygon;
         private List<string[]> teamSettings;
         private RequestJson json;
+        private Loger loger;
 
         #region Initialization
         public MainWindow()
         {
             InitializeComponent();
             this.json = new RequestJson();
+            this.loger = Loger.getInstance();
             authorization();
             startListening();
         }
@@ -64,7 +66,7 @@ namespace roboProg
             }
             catch (Exception e)
             {
-                log("resive from poligon ERROR:" + e.Message);
+                WriteErrorLogBox("Error from start listening proces:" + e.Message);
             }
         }
         #endregion
@@ -78,17 +80,29 @@ namespace roboProg
             }
             catch (Exception e)
             {
-                log("resive from poligon ERROR: " + e.Message);
+                WriteErrorLogBox("resive from poligon ERROR: " + e.Message);
             }
         }
 
         private void listening()
         {
-            UDPReciver listenSocket = UDPReciver.getInstans();
+            UDPReciever listenSocket = UDPReciever.getInstans();
             while (true)
             {
                 string[] data = listenSocket.getMessage();
-                writePropertyFromePoligon(data);
+                tryWritePropertyFromePoligon(data);
+            }
+        }
+
+        private void tryWritePropertyFromePoligon(string[] message)
+        {
+            try
+            {
+                writePropertyFromePoligon(message);
+            }
+            catch(Exception e)
+            {
+                WriteErrorLogBox(e.Message);
             }
         }
 
@@ -96,9 +110,8 @@ namespace roboProg
         {
             if (teamCyclicalRun)
             {
-                writeUDPLog(message);
-                string[] data = dataPreparation(message[0]);
-                preparationDataAndWrite(data, message[1], message[2]);
+                PoligonDataLog("recieve from poligon: " + message[0] + message[1] + ":" + message[2]);
+                preparationDataAndWrite(message[0], message[1], message[2]);
             }
         }
 
@@ -118,40 +131,35 @@ namespace roboProg
             return s;
         }
 
-        private void preparationDataAndWrite(string[] data, string ip, string port)
+        private void preparationDataAndWrite(string data, string ip, string port)
         {
             int lenght = this.teamSettings.Count;
             for (int i = 0; i < lenght; i++)
             {
-                string[] thing = this.teamSettings[i];
-                if (ip.Equals(thing[2]) && port.Equals(thing[3]))
+                if (checkThing(i, ip, port))
                 {
                     writeProperty(i, data);
                 }
             }
         }
 
-        private void writeProperty(int indexOfThing, string[] data)
+        private bool checkThing(int indexOfThing, string ip, string port)
         {
-            this.thingsPropertyInPolygon[indexOfThing] = new Dictionary<string, string>();
-            string[] template = this.json.getTemplateFromPoligon(data[0]);
-            for (int i = 2; i < data.Length; i++)
-            {
-                this.thingsPropertyInPolygon[indexOfThing].Add(template[i - 2], data[i]);
-            }
+            string[] thing = this.teamSettings[indexOfThing];
+            return ip.Equals(thing[2]) && port.Equals(thing[3]);
         }
 
-        private void writeUDPLog(string[] data)
+        private void writeProperty(int indexOfThing, string data)
         {
-            log("recieve from poligon: " + data[0] + "\n" +
-                       data[1] + ":" + data[2]);
+            ConvertDataToSave convertData = new ConvertDataToSave(this.teamSettings[indexOfThing][0], "poligon");
+            this.thingsPropertyInPolygon[indexOfThing] = convertData.getDictionary(data);
         }
         #endregion
 
         #region AllThings
         private async void AllThingsButton_Click(object sender, RoutedEventArgs e)
         {
-            log("click 'отправить запрос'");
+            ServerDatalog("click 'отправить запрос'");
             if (checkFields())
             {
                 Messenger messenger = new Messenger(authInfo(), address(), authorizationType());
@@ -162,7 +170,7 @@ namespace roboProg
 
         private void tryWriteAllThings(string json)
         {
-            writeLogBox(json);
+            writeFromServerLogBox(json);
             try
             {
                 writeAllThing(json);
@@ -199,7 +207,7 @@ namespace roboProg
 
         private void teamClick(string name)
         {
-            log("select " + name);
+            StartTeamLogBoxWrite("select " + name);
             сachItemInfo(name);
         }
 
@@ -212,15 +220,15 @@ namespace roboProg
             }
             catch (Exception exception)
             {
-                log(exception.Message);
+                WriteErrorLogBox(exception.Message);
             }
         }
 
         private void teamInfo(string teamName)
         {
             readTeamInfo(teamName);
-            startButtonPrepare();
             preparePropertyFields();
+            startButtonPrepare();
         }
 
         private void readTeamInfo(string teamName)
@@ -255,11 +263,9 @@ namespace roboProg
         #endregion
 
         #region cyclical functions
-
-        #region data transfer
         private void TeamStart_Click(object sender, RoutedEventArgs e)
         {
-            log("start " + TeamStart.Content);
+            StartTeamLogBoxWrite("start " + TeamStart.Content);
             if (checkFields())
             {
                 if (this.teamCyclicalRun) stopTeamCicleRequest();
@@ -290,6 +296,7 @@ namespace roboProg
             }
         }
 
+        #region data transfer
         private async Task cyclicalRequest(Messenger messenger, int teamListLenght)
         {
             for (int i = 0; i < teamListLenght; i++)
@@ -306,7 +313,7 @@ namespace roboProg
             {
                 sendUDP(thing, indexOfThing);
                 sendPropertyToServer(messenger, indexOfThing);
-                fullingPropertyView();
+                //fullingPropertyView();
             }
         }
 
@@ -319,7 +326,7 @@ namespace roboProg
             }
             catch(Exception e)
             {
-                writeLogBox(e.Message);
+                WriteErrorLogBox(e.Message);
                 result = false;
             }
 
@@ -329,9 +336,37 @@ namespace roboProg
         private async Task property(Messenger messenger, string[] thing, int indexOfThing)
         {
             string json = await messenger.reqestToService(thing[4], thing[5]);
-            if (json.Equals("{}")) throw new Exception("нет данных");
-            writeLogBox(json);
-            this.thingsPropertyInServer[indexOfThing] = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            if (json.Equals("{}")) throw new Exception("there is no data");
+            Dictionary<string, string> newData = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            if (!сomparer(newData, indexOfThing)) throw new Exception("repeat data" + json);
+            writeFromServerLogBox(json);
+            this.thingsPropertyInServer[indexOfThing] = newData;
+        }
+
+        private bool сomparer(Dictionary<string, string> newData, int index)
+        {
+            bool result = true;
+            Dictionary<string, string> thingsProperty = this.thingsPropertyInServer[index];
+
+            if (thingsProperty != null)
+            {
+                result = checkValues(thingsProperty, newData);
+            }
+
+            return result;
+        }
+
+        private bool checkValues(Dictionary<string, string> oldData, Dictionary<string, string> newData)
+        {
+            bool result = false;
+            foreach (KeyValuePair<string, string> keyValuePair in newData)
+            {
+                if (!keyValuePair.Key.Equals("N"))
+                {
+                    if (!oldData[keyValuePair.Key].Equals(keyValuePair.Value)) result = true;
+                }
+            }
+            return result;
         }
 
         private void sendUDP(string[] thing, int indexOfThing)
@@ -339,15 +374,22 @@ namespace roboProg
             UDPSendler sendler = new UDPSendler(thing[2], thing[3]);
             string sendData = this.json.collectStringData(this.thingsPropertyInServer[indexOfThing], thing[0]);
             sendler.sendTo(sendData);
+            PoligonDataLog("send to " + thing[2] + ":" + thing[3] + "   " + sendData);
         }
 
         private void sendPropertyToServer(Messenger messenger, int indexOfThing)
         {
-            if (this.thingsPropertyInPolygon[indexOfThing] != null)
+            try
             {
-                log("send data to server");
-                string json = JsonConvert.SerializeObject(this.thingsPropertyInPolygon[indexOfThing]);
-                messenger.reqestToService(teamSettings[indexOfThing][4], teamSettings[indexOfThing][5], json);
+                if (this.thingsPropertyInPolygon[indexOfThing] != null)
+                {
+                    ServerDatalog("send data to server");
+                    string json = JsonConvert.SerializeObject(this.thingsPropertyInPolygon[indexOfThing]);
+                    messenger.reqestToService(teamSettings[indexOfThing][4], teamSettings[indexOfThing][5], json);
+                }
+            }catch
+            {
+                throw new Exception("Error sendPropertyToServer");
             }
         }
 
@@ -376,6 +418,13 @@ namespace roboProg
             showProperty(PropertyInPolygonViews, thingsPropertyInPolygon[indexOfSelectedThing]);
         }
 
+        private void paramFieldClin()
+        {
+            SelectedThingName.Text = null;
+            PropertyInServiceViews.Document = new FlowDocument();
+            PropertyInPolygonViews.Document = new FlowDocument();
+        }
+
         private void showProperty(RichTextBox propertyView, Dictionary<string, string> thingProperty)
         {
             string dataToWrite;
@@ -384,13 +433,6 @@ namespace roboProg
                 dataToWrite = property.Key + " : " + property.Value + Environment.NewLine;
                 propertyView.AppendText(dataToWrite);
             }
-        }
-
-        private void paramFieldClin()
-        {
-            SelectedThingName.Text = null;
-            PropertyInServiceViews.Document = new FlowDocument();
-            PropertyInPolygonViews.Document = new FlowDocument();
         }
         #endregion
 
@@ -462,12 +504,12 @@ namespace roboProg
             bool error = false;
             if (AuthKey.Text.Length == 0)
             {
-                log("не указан Ключ!!!");
+                WriteErrorLogBox("не указан Ключ!!!");
                 error = true;
             }
             else
             {
-                log("указанный ключ: " + AuthKey.Text);
+                StartTeamLogBoxWrite("указанный ключ: " + AuthKey.Text);
             }
 
             return !error;
@@ -478,16 +520,16 @@ namespace roboProg
             bool error = false;
             if (Login.Text.Length == 0)
             {
-                log("не указан логин!!!");
+                WriteErrorLogBox("не указан логин!!!");
                 error = true;
             }
             else
             {
-                log("указанный логин: " + Login.Text);
+                StartTeamLogBoxWrite("указанный логин: " + Login.Text);
             }
             if (Password.Password.Length == 0)
             {
-                log("не введен пароль!!!");
+                WriteErrorLogBox("не введен пароль!!!");
                 error = true;
             }
             return !error;
@@ -498,12 +540,12 @@ namespace roboProg
             bool error = false;
             if (IP.Text.Equals(""))
             {
-                log("не указан IP!!!");
+                WriteErrorLogBox("не указан IP!!!");
                 error = true;
             }
             if (Port.Text.Equals(""))
             {
-                log("не указан порт!!!");
+                WriteErrorLogBox("не указан порт!!!");
                 error = true;
             }
             return !error;
@@ -511,21 +553,76 @@ namespace roboProg
         #endregion
 
         #region log
-        private void log(string text)
+        private void WriteErrorLogBox(string text)
         {
-            Loger loger = Loger.getInstance();
-            writeLogBox(text);
-            loger.writeLog(text);
+            ErrorLogBox.AppendText(text + Environment.NewLine);
+            ErrorLogBox.ScrollToEnd();
+            this.loger.writeLog(text);
         }
 
-        public void writeLogBox(string text)
+        private void StartTeamLogBoxWrite(string text)
         {
-            Dispatcher.Invoke(() => 
+            StartTeamLogBox.AppendText(text + Environment.NewLine);
+            StartTeamLogBox.ScrollToEnd();
+            this.loger.writeLog(text);
+        }
+
+        private void ServerDatalog(string text)
+        {
+            ToServerLogBox.AppendText(text + Environment.NewLine);
+            ToServerLogBox.ScrollToEnd();
+            //writeLogBox(text);
+            this.loger.writeLog(text);
+        }
+
+        public void writeFromServerLogBox(string text)
+        {
+            FromServerLogBox.AppendText(text + Environment.NewLine);
+            FromServerLogBox.ScrollToEnd();
+        }
+
+        private void PoligonDataLog(string text)
+        {
+            writeUDPLogBox(text);
+            this.loger.writeLog(text);
+        }
+
+        public void writeUDPLogBox(string text)
+        {
+            Dispatcher.Invoke(() =>
             {
-                LogBox.AppendText(text + Environment.NewLine);
-                LogBox.ScrollToEnd();
+                UDPLogBox.AppendText(text + Environment.NewLine);
+                UDPLogBox.ScrollToEnd();
             });
         }
         #endregion
+
+        #region initial button
+        private void InitializationRecieveButton_Click(object sender, RoutedEventArgs e)
+        {
+            string[] literals = getLiters();
+            foreach(string[] thing in this.teamSettings)
+            {
+                if (literals.Contains(thing[0].ToLower()))
+                {
+                    UDPSendler sendler = new UDPSendler(thing[2], thing[3]);
+                    sendler.sendTo("r");
+                }
+            }
+        }
+        
+        private string[] getLiters()
+        {
+            char[] separators = new char[] { ' ', '.', ',', ':', ';' };
+            string[] literals = LiteraOfRecieve.Text.ToLower().Split(separators, StringSplitOptions.RemoveEmptyEntries);
+            return literals;
+        }
+        #endregion
+
+        private void OpenSettingsWindow_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsWindow settingsWindow = new SettingsWindow();
+            settingsWindow.Show();
+        }
     }
 }

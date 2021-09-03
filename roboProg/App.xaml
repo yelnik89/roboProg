@@ -4,6 +4,8 @@
              xmlns:local="clr-namespace:roboProg"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+    <Style TargetType="Grid">
+        <Setter Property="Background" Value="Red"/>
+    </Style>
     </Application.Resources>
 </Application>

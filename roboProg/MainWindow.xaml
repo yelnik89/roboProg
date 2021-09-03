@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:roboProg"
         mc:Ignorable="d"
         Title="MainWindow" Height="537" Width="1204">
-    <Grid Background="#FFF0F0F0" Margin="0,0,2,-1">
+    <Grid Background="#FFF0F0F0" Margin="0,0,2,-191">
         <Label x:Name="LoginLabel" Content="Логин" HorizontalAlignment="Left" Margin="10,19,0,0" VerticalAlignment="Top" Width="47" RenderTransformOrigin="0.532,0.615"/>
         <TextBox x:Name="Login" HorizontalAlignment="Left" Height="19" Margin="62,22,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="178" BorderBrush="#FF7A7A7A" Background="White"/>
         <Label x:Name="PasswordLabel" Content="Пароль" HorizontalAlignment="Left" Margin="250,19,0,0" VerticalAlignment="Top" Width="55" Height="25"/>
@@ -24,7 +24,7 @@
             <TextBlock>по ключу</TextBlock>
             <TextBlock>по логину</TextBlock>
         </ComboBox>
-        <RichTextBox x:Name="LogBox" Margin="10,160,0,10" BorderBrush="#FF7A7A7A" IsReadOnly="True" HorizontalAlignment="Left" Width="537" Background="#FFF9F9F9" TextOptions.TextFormattingMode="Display">
+        <RichTextBox x:Name="FromServerLogBox" Margin="10,290,0,0" BorderBrush="#FF7A7A7A" IsReadOnly="True" HorizontalAlignment="Left" Width="305" Background="#FFF9F9F9" TextOptions.TextFormattingMode="Display" Height="179" VerticalAlignment="Top">
             <FlowDocument/>
         </RichTextBox>
         <Label x:Name="PaceLabel" Content="частота опроса в мс" HorizontalAlignment="Left" Margin="570,19,0,0" VerticalAlignment="Top" Width="125"/>
@@ -41,6 +41,25 @@
             <FlowDocument/>
         </RichTextBox>
         <RichTextBox x:Name="PropertyInPolygonViews" HorizontalAlignment="Left" Margin="890,160,0,10" Width="100" BorderBrush="#FF7A7A7A" IsReadOnly="True">
+            <FlowDocument/>
+        </RichTextBox>
+        <RichTextBox x:Name="UDPLogBox" Margin="327,160,0,10" BorderBrush="#FF7A7A7A" IsReadOnly="True" HorizontalAlignment="Left" Width="220" Background="#FFF9F9F9" TextOptions.TextFormattingMode="Display">
+            <FlowDocument/>
+        </RichTextBox>
+        <Label x:Name="UDPLogLabel" Content="UDP Log" HorizontalAlignment="Left" Height="29" Margin="327,131,0,0" VerticalAlignment="Top" Width="73"/>
+        <Label x:Name="FromServerLogBoxLabel" Content="Data from server" HorizontalAlignment="Left" Height="29" Margin="10,261,0,0" VerticalAlignment="Top" Width="100"/>
+        <TextBox x:Name="LiteraOfRecieve" Text="p,r" HorizontalAlignment="Left" Height="19" Margin="1141,160,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="29" IsReadOnly="false" BorderBrush="#FF7A7A7A"/>
+        <Button x:Name="InitializationRecieveButton" Content="send r to" HorizontalAlignment="Left" Margin="1025,160,0,0" VerticalAlignment="Top" Width="92" Height="22" Click="InitializationRecieveButton_Click"/>
+        <Button x:Name="OpenSettingsWindow" Content="Set Settings" HorizontalAlignment="Left" Margin="1010,650,0,0" VerticalAlignment="Top" Width="145" Height="37" FontSize="24" Click="OpenSettingsWindow_Click"/>
+        <Label x:Name="ErrorLogBoxLabel" Content="Error Log" HorizontalAlignment="Left" Height="29" Margin="10,131,0,0" VerticalAlignment="Top" Width="100"/>
+        <RichTextBox x:Name="ErrorLogBox" Margin="10,160,0,0" BorderBrush="#FF7A7A7A" IsReadOnly="True" HorizontalAlignment="Left" Width="305" Background="#FFF9F9F9" TextOptions.TextFormattingMode="Display" Height="91" VerticalAlignment="Top">
+            <FlowDocument/>
+        </RichTextBox>
+        <Label x:Name="ToServerLogBoxLabel" Content="Data to server" HorizontalAlignment="Left" Height="29" Margin="10,479,0,0" VerticalAlignment="Top" Width="100"/>
+        <RichTextBox x:Name="ToServerLogBox" Margin="10,508,0,0" BorderBrush="#FF7A7A7A" IsReadOnly="True" HorizontalAlignment="Left" Width="305" Background="#FFF9F9F9" TextOptions.TextFormattingMode="Display" Height="179" VerticalAlignment="Top">
+            <FlowDocument/>
+        </RichTextBox>
+        <RichTextBox x:Name="StartTeamLogBox" Margin="570,160,0,0" BorderBrush="#FF7A7A7A" IsReadOnly="True" HorizontalAlignment="Left" Width="175" Background="#FFF9F9F9" TextOptions.TextFormattingMode="Display" Height="215" VerticalAlignment="Top">
             <FlowDocument/>
         </RichTextBox>
 
