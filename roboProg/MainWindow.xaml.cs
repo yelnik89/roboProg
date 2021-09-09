@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using System.Threading;
 
 namespace roboProg
 {
@@ -16,6 +17,7 @@ namespace roboProg
     /// </summary>
     public partial class MainWindow : Window
     {
+        private int _pace = 1000;
         private bool teamCyclicalRun = false;
         private string teamName;
         private int indexOfSelectedThing;
@@ -24,7 +26,9 @@ namespace roboProg
         private Dictionary<string, string>[] thingsPropertyInPolygon;
         private List<string[]> teamSettings;
         private RequestJson json;
+        private Dispatcher workDispatcher;
         private Loger loger;
+        public WorkCycle Work;
 
         #region Initialization
         public MainWindow()
@@ -32,8 +36,21 @@ namespace roboProg
             InitializeComponent();
             this.json = new RequestJson();
             this.loger = Loger.getInstance();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
             authorization();
-            startListening();
+        }
+
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            this.Work = new WorkCycle();
+            Thread thread = new Thread(new ThreadStart(() =>
+            {
+                Work.Main(this);
+            }));
+            thread.Start();
         }
 
         private void authorization()
@@ -55,104 +72,6 @@ namespace roboProg
             Port.Text = authdata[2];
             Login.Text = authdata[3];
             Password.Password = authdata[4];
-        }
-
-        private void startListening()
-        {
-            Task startListening = new Task(cachListening);
-            try
-            {
-                startListening.Start();
-            }
-            catch (Exception e)
-            {
-                WriteErrorLogBox("Error from start listening proces:" + e.Message);
-            }
-        }
-        #endregion
-
-        #region UDP Listening
-        private void cachListening()
-        {
-            try
-            {
-                listening();
-            }
-            catch (Exception e)
-            {
-                WriteErrorLogBox("resive from poligon ERROR: " + e.Message);
-            }
-        }
-
-        private void listening()
-        {
-            UDPReciever listenSocket = UDPReciever.getInstans();
-            while (true)
-            {
-                string[] data = listenSocket.getMessage();
-                tryWritePropertyFromePoligon(data);
-            }
-        }
-
-        private void tryWritePropertyFromePoligon(string[] message)
-        {
-            try
-            {
-                writePropertyFromePoligon(message);
-            }
-            catch(Exception e)
-            {
-                WriteErrorLogBox(e.Message);
-            }
-        }
-
-        private void writePropertyFromePoligon(string[] message)
-        {
-            if (teamCyclicalRun)
-            {
-                PoligonDataLog("recieve from poligon: " + message[0] + message[1] + ":" + message[2]);
-                preparationDataAndWrite(message[0], message[1], message[2]);
-            }
-        }
-
-        private string[] dataPreparation(string data)
-        {
-            data = trimer(data);
-            string[] result = data.Split(':');
-            return result;
-        }
-
-        private string trimer(string s)
-        {
-            s = s.Trim(' ');
-            s = s.Trim('\n');
-            s = s.Trim('#');
-            s = s.Trim(' ');
-            return s;
-        }
-
-        private void preparationDataAndWrite(string data, string ip, string port)
-        {
-            int lenght = this.teamSettings.Count;
-            for (int i = 0; i < lenght; i++)
-            {
-                if (checkThing(i, ip, port))
-                {
-                    writeProperty(i, data);
-                }
-            }
-        }
-
-        private bool checkThing(int indexOfThing, string ip, string port)
-        {
-            string[] thing = this.teamSettings[indexOfThing];
-            return ip.Equals(thing[2]) && port.Equals(thing[3]);
-        }
-
-        private void writeProperty(int indexOfThing, string data)
-        {
-            ConvertDataToSave convertData = new ConvertDataToSave(this.teamSettings[indexOfThing][0], "poligon");
-            this.thingsPropertyInPolygon[indexOfThing] = convertData.getDictionary(data);
         }
         #endregion
 
@@ -217,6 +136,7 @@ namespace roboProg
             {
                 teamInfo(teamName);
                 fullingTeamThingsList(this.teamSettings);
+                Work.TeamInfo(teamName);
             }
             catch (Exception exception)
             {
@@ -276,129 +196,29 @@ namespace roboProg
         private void startTeamCicleRequest()
         {
             TeamStart.Content = "STOP";
-            this.teamCyclicalRun = true;
-            cyclicalMethod();
+            Work.StartCycle();
         }
 
         private void stopTeamCicleRequest()
         {
             this.teamCyclicalRun = false;
+            Work.StopCycle();
             TeamStart.Content = this.teamName;
-        }
-
-        private async void cyclicalMethod()
-        {
-            Messenger messenger = new Messenger(authInfo(), address(), authorizationType());
-            int teamListLenght = this.teamSettings.Count();
-            while (this.teamCyclicalRun)
-            {
-                await cyclicalRequest(messenger, teamListLenght);
-            }
-        }
-
-        #region data transfer
-        private async Task cyclicalRequest(Messenger messenger, int teamListLenght)
-        {
-            for (int i = 0; i < teamListLenght; i++)
-            {
-                await dataTransfer(messenger, this.teamSettings[i], i);
-                if (!this.teamCyclicalRun) break;
-            }
-            await Task.Delay(pace());
-        }
-
-        private async Task dataTransfer(Messenger messenger, string[] thing, int indexOfThing)
-        {
-            if (await cachProperty(messenger, thing, indexOfThing))
-            {
-                sendUDP(thing, indexOfThing);
-                sendPropertyToServer(messenger, indexOfThing);
-                //fullingPropertyView();
-            }
-        }
-
-        private async Task<bool> cachProperty(Messenger messenger, string[] thing, int indexOfThing)
-        {
-            bool result = true;
-            try
-            {
-                await property(messenger, thing, indexOfThing);
-            }
-            catch(Exception e)
-            {
-                WriteErrorLogBox(e.Message);
-                result = false;
-            }
-
-            return result;
-        }
-
-        private async Task property(Messenger messenger, string[] thing, int indexOfThing)
-        {
-            string json = await messenger.reqestToService(thing[4], thing[5]);
-            if (json.Equals("{}")) throw new Exception("there is no data");
-            Dictionary<string, string> newData = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-            if (!сomparer(newData, indexOfThing)) throw new Exception("repeat data" + json);
-            writeFromServerLogBox(json);
-            this.thingsPropertyInServer[indexOfThing] = newData;
-        }
-
-        private bool сomparer(Dictionary<string, string> newData, int index)
-        {
-            bool result = true;
-            Dictionary<string, string> thingsProperty = this.thingsPropertyInServer[index];
-
-            if (thingsProperty != null)
-            {
-                result = checkValues(thingsProperty, newData);
-            }
-
-            return result;
-        }
-
-        private bool checkValues(Dictionary<string, string> oldData, Dictionary<string, string> newData)
-        {
-            bool result = false;
-            foreach (KeyValuePair<string, string> keyValuePair in newData)
-            {
-                if (!keyValuePair.Key.Equals("N"))
-                {
-                    if (!oldData[keyValuePair.Key].Equals(keyValuePair.Value)) result = true;
-                }
-            }
-            return result;
-        }
-
-        private void sendUDP(string[] thing, int indexOfThing)
-        {
-            UDPSendler sendler = new UDPSendler(thing[2], thing[3]);
-            string sendData = this.json.collectStringData(this.thingsPropertyInServer[indexOfThing], thing[0]);
-            sendler.sendTo(sendData);
-            PoligonDataLog("send to " + thing[2] + ":" + thing[3] + "   " + sendData);
-        }
-
-        private void sendPropertyToServer(Messenger messenger, int indexOfThing)
-        {
-            try
-            {
-                if (this.thingsPropertyInPolygon[indexOfThing] != null)
-                {
-                    ServerDatalog("send data to server");
-                    string json = JsonConvert.SerializeObject(this.thingsPropertyInPolygon[indexOfThing]);
-                    messenger.reqestToService(teamSettings[indexOfThing][4], teamSettings[indexOfThing][5], json);
-                }
-            }catch
-            {
-                throw new Exception("Error sendPropertyToServer");
-            }
         }
 
         private int pace()
         {
-            if (Pace.Text.Length == 0) return 0;
-            else return int.Parse(Pace.Text);
+            
+            if (Pace.Text.Length == 0) Pace.Text = Convert.ToString(_pace);
+            else
+            {
+                try { _pace = Convert.ToInt32(Pace.Text); }
+                catch { Pace.Text = Convert.ToString(_pace); }
+            }
+            
+            return _pace;
+
         }
-        #endregion
 
         #region view property
         private void TeamThingsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -591,8 +411,8 @@ namespace roboProg
         {
             Dispatcher.Invoke(() =>
             {
-                UDPLogBox.AppendText(text + Environment.NewLine);
-                UDPLogBox.ScrollToEnd();
+                ToPoligonLogBox.AppendText(text + Environment.NewLine);
+                ToPoligonLogBox.ScrollToEnd();
             });
         }
         #endregion
@@ -624,5 +444,76 @@ namespace roboProg
             SettingsWindow settingsWindow = new SettingsWindow();
             settingsWindow.Show();
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            this.Work.Close();
+        }
+
+        private void Pace_LostFocus(object sender, RoutedEventArgs e)
+        {
+            Work.Pace = pace();
+        }
+
+        private void Grid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            Work.Pace = pace();
+        }
+
+        #region Window Interfase
+        public void ShowInTextBox(string box, string text)
+        {
+            switch (box)
+            {
+                case "error":
+                    showError(text);
+                    break;
+                case "to server":
+                    showDataToSever(text);
+                    break;
+                case "from server":
+                    showDataFromServer(text);
+                    break;
+                case "to poligon":
+                    showDataFromServer(text);
+                    break;
+                case "from poligon":
+                    showDataFromServer(text);
+                    break;
+            }
+        }
+
+        private void showError(string text)
+        {
+            writeTextOnTextBox(ErrorLogBox, text);
+        }
+
+        private void showDataToSever(string text)
+        {
+            writeTextOnTextBox(ToServerLogBox, text);
+        }
+
+        private void showDataFromServer(string text)
+        {
+            writeTextOnTextBox(FromServerLogBox, text);
+        }
+        private void showDataToPoligon(string text)
+        {
+            writeTextOnTextBox(ToPoligonLogBox, text);
+        }
+        private void showDataFromPoligon(string text)
+        {
+            writeTextOnTextBox(FromPoligonLogBox, text);
+        }
+
+        private void writeTextOnTextBox(RichTextBox textBox, string text)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                textBox.AppendText(text + Environment.NewLine);
+                textBox.ScrollToEnd();
+            });
+        }
+        #endregion
     }
 }
