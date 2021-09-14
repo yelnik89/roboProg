@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace roboProg
 {
-    class RequestJson
+    class JsonTemplate
     {
         private string[] trafficLightsServer = { "l1", "l2", "l3", "l4" };
         private string[] remotTerminalServer = { "l1", "l2", "l3", "l4" };

@@ -18,7 +18,7 @@ namespace roboProg
         {
             this.litera = litera;
             this.whereTo = whereTo;
-            this.template = getTemplate();
+            setTemplate();
         }
         
         public Dictionary<string, string> getDictionary(string data)
@@ -28,17 +28,14 @@ namespace roboProg
             return propertyDictionary;
         }
 
-        private string[] getTemplate()
+        private void setTemplate()
         {
-            string[] template = { };
-            if (this.whereTo.Equals("poligon")) return templateForPoligon();
-            return template;
-        }
-        
-        private string[] templateForPoligon()
-        {
-            RequestJson requestJson = new RequestJson();
-            return requestJson.getTemplateFromPoligon(this.litera);
+            JsonTemplate template = new JsonTemplate();
+            if (this.whereTo.Equals("poligon"))
+            {
+                this.template = template.getTemplateFromPoligon(this.litera);
+            }
+            else this.template = new string[] { };
         }
 
         private Dictionary<string, string> preparationData(string data)
@@ -51,6 +48,12 @@ namespace roboProg
             char[] separator = { '\n' };
             string[] dataStrings = splitString(data, separator);
             return fullDicrionary(dataStrings);
+        }
+
+        private string[] splitString(string dataString, char[] separator)
+        {
+            string[] dataStrings = dataString.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+            return dataStrings;
         }
 
         private Dictionary<string, string> fullDicrionary(string[] data)
@@ -87,12 +90,6 @@ namespace roboProg
             dictionary.Add("s", data[2].ToString());
             dictionary.Add("n", data[3].ToString());
             return dictionary;
-        }
-
-        private string[] splitString(string dataString, char[] separator)
-        {
-            string[] dataStrings = dataString.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-            return dataStrings;
         }
 
         private string trimer(string s)

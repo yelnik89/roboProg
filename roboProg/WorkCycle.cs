@@ -17,39 +17,46 @@ namespace roboProg
         private const string _fromPoligon = "from poligon";
         private const string _error = "error";
 
-        private MainWindow window;
-        private bool Work;
-        private int pace;
-        private Dispatcher dispatcher;
-        private string[] authorizationData = new string[3];
-        private bool cyclicalRun = false;
-        private Dictionary<string, string>[] thingsPropertyInServer;
-        private Dictionary<string, string>[] thingsPropertyInPolygon;
-        private List<string[]> teamSettings;
-        private Messenger messenger;
-        private RequestJson json;
-        private Loger loger;
+        private MainWindow _window;
+        private bool _work;
+        private int _pace;
+        private Dispatcher _dispatcher;
+        private string[] _authorizationData = new string[3];
+        private bool _cyclicalRun = false;
+        private Dictionary<string, string>[] _thingsPropertyInServer;
+        private Dictionary<string, string>[] _thingsPropertyInPolygon;
+        private List<string[]> _teamSettings;
+        private Messenger _messenger;
+        private JsonTemplate _json;
+        private Loger _loger;
 
-        public int Pace { get => pace; set => pace = value; }
+        public int Pace { get => _pace; set => _pace = value; }
 
         public void Main(MainWindow window)
         {
-            this.window = window;
-            this.loger = Loger.getInstance();
-            this.json = new RequestJson();
-            this.Work = false;
-            this.dispatcher = Dispatcher.CurrentDispatcher;
+            _window = window;
+            _loger = Loger.getInstance();
+            _json = new JsonTemplate();
+            _work = true;
+            _dispatcher = Dispatcher.CurrentDispatcher;
             WorkMethod();
+        }
+
+        public void SetAuthorizationData(string authInfo, string address, string authorizationType)
+        {
+            _authorizationData[0] = authInfo;
+            _authorizationData[1] = address;
+            _authorizationData[2] = authorizationType;
         }
 
         private void WorkMethod()
         {
             startListening();
 
-            while (Work)
+            while (_work)
             {
-                if (cyclicalRun) CycleMethod();
-                Thread.Sleep(5);
+                if (_cyclicalRun) CycleMethod();
+                Thread.Sleep(3);
             }
         }
 
@@ -97,16 +104,16 @@ namespace roboProg
 
         private void writePropertyFromePoligon(string[] message)
         {
-            if (cyclicalRun)
+            if (_cyclicalRun)
             {
-                sendToWindowTextBox(_fromPoligon, message[0] + message[1] + ":" + message[2]);
                 preparationDataAndWrite(message[0], message[1], message[2]);
+                sendToWindowTextBox(_fromPoligon, message[0] + message[1] + ":" + message[2]);
             }
         }
 
         private void preparationDataAndWrite(string data, string ip, string port)
         {
-            int lenght = this.teamSettings.Count;
+            int lenght = _teamSettings.Count;
             for (int i = 0; i < lenght; i++)
             {
                 if (checkThing(i, ip, port)) writeProperty(i, data);
@@ -115,20 +122,20 @@ namespace roboProg
 
         private bool checkThing(int indexOfThing, string ip, string port)
         {
-            string[] thing = this.teamSettings[indexOfThing];
+            string[] thing = _teamSettings[indexOfThing];
             return ip.Equals(thing[2]) && port.Equals(thing[3]);
         }
 
         private void writeProperty(int indexOfThing, string data)
         {
-            ConvertDataToSave convertData = new ConvertDataToSave(this.teamSettings[indexOfThing][0], "poligon");
-            this.thingsPropertyInPolygon[indexOfThing] = convertData.getDictionary(data);
+            ConvertDataToSave convertData = new ConvertDataToSave(_teamSettings[indexOfThing][0], "poligon");
+            _thingsPropertyInPolygon[indexOfThing] = convertData.getDictionary(data);
         }
         #endregion
 
         public Dispatcher getDispatcher()
         {
-            return this.dispatcher;
+            return _dispatcher;
         }
 
         public void TeamInfo(string teamName)
@@ -140,29 +147,22 @@ namespace roboProg
         private void readTeamInfo(string teamName)
         {
             FileReader reader = new FileReader();
-            this.teamSettings = reader.itemInfo(teamName);
+            _teamSettings = reader.itemInfo(teamName);
         }
 
         private void preparePropertyFields()
         {
-            this.thingsPropertyInServer = new Dictionary<string, string>[teamSettings.Count];
-            this.thingsPropertyInPolygon = new Dictionary<string, string>[teamSettings.Count];
-        }
-
-        public void SetAuthorizationData(string address, string authInfo, string authorizationType)
-        {
-            this.authorizationData[0] = address;
-            this.authorizationData[1] = authInfo;
-            this.authorizationData[2] = authorizationType;
+            _thingsPropertyInServer = new Dictionary<string, string>[_teamSettings.Count];
+            _thingsPropertyInPolygon = new Dictionary<string, string>[_teamSettings.Count];
         }
 
         private void CycleMethod()
         {
-            this.messenger = new Messenger(authorizationData[0], authorizationData[1], authorizationData[2]);
-            int teamListLenght = this.teamSettings.Count();
-            while (cyclicalRun)
+            _messenger = new Messenger(_authorizationData[0], _authorizationData[1], _authorizationData[2]);
+            int teamListLenght = _teamSettings.Count();
+            while (_cyclicalRun)
             {
-                cyclicalRequest(messenger, teamListLenght);
+                cyclicalRequest(_messenger, teamListLenght);
             }
         }
 
@@ -170,10 +170,10 @@ namespace roboProg
         {
             for (int i = 0; i < teamListLenght; i++)
             {
-                dataTransfer(messenger, this.teamSettings[i], i);
-                if (!this.cyclicalRun) break;
+                dataTransfer(messenger, _teamSettings[i], i);
+                if (!_cyclicalRun) break;
             }
-            Thread.Sleep(pace);
+            Thread.Sleep(_pace);
         }
 
         private async void dataTransfer(Messenger messenger, string[] thing, int indexOfThing)
@@ -203,17 +203,20 @@ namespace roboProg
         {
             string json = await messenger.reqestToService(thing[4], thing[5]);
             if (json.Equals("{}")) throw new Exception("there is no data");
+
             Dictionary<string, string> newData = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
             if (!сomparer(newData, indexOfThing)) throw new Exception("repeat data" + json);
+
             sendToWindowTextBox(_fromServer, json);
-            this.thingsPropertyInServer[indexOfThing] = newData;
+            _thingsPropertyInServer[indexOfThing] = newData;
         }
+
         #region сomparer
         private bool сomparer(Dictionary<string, string> newData, int indexOfThing)
         {
             bool result = true;
 
-            if (this.thingsPropertyInServer[indexOfThing] != null)
+            if (_thingsPropertyInServer[indexOfThing] != null)
             {
                 result = checkValues(indexOfThing, newData);
             }
@@ -228,7 +231,7 @@ namespace roboProg
             {
                 if (!keyValuePair.Key.Equals("N"))
                 {
-                    if (!this.thingsPropertyInServer[indexOfThing][keyValuePair.Key].Equals(keyValuePair.Value)) result = true;
+                    if (!_thingsPropertyInServer[indexOfThing][keyValuePair.Key].Equals(keyValuePair.Value)) result = true;
                 }
             }
             return result;
@@ -238,7 +241,7 @@ namespace roboProg
         private void sendUDP(string[] thing, int indexOfThing)
         {
             UDPSendler sendler = new UDPSendler(thing[2], thing[3]);
-            string sendData = this.json.collectStringData(this.thingsPropertyInServer[indexOfThing], thing[0]);
+            string sendData = _json.collectStringData(_thingsPropertyInServer[indexOfThing], thing[0]);
             sendler.sendTo(sendData);
             sendToWindowTextBox(_toPoligon, thing[2] + ":" + thing[3] + "   " + sendData);
         }
@@ -251,34 +254,35 @@ namespace roboProg
 
         private async void SendPropertyToServer(Messenger messenger, int indexOfThing)
         {
-            if (this.thingsPropertyInPolygon[indexOfThing] != null)
+            if (_thingsPropertyInPolygon[indexOfThing] != null)
             {
-                string json = JsonConvert.SerializeObject(this.thingsPropertyInPolygon[indexOfThing]);
-                sendToWindowTextBox(_toServer, teamSettings[indexOfThing][4] + json);
-                await messenger.reqestToService(teamSettings[indexOfThing][4], teamSettings[indexOfThing][5], json);
+                string json = JsonConvert.SerializeObject(_thingsPropertyInPolygon[indexOfThing]);
+                sendToWindowTextBox(_toServer, _teamSettings[indexOfThing][4] + json);
+                await messenger.reqestToService(_teamSettings[indexOfThing][4], _teamSettings[indexOfThing][5], json);
             }
         }
 
         private void sendToWindowTextBox(string box, string text)
         {
-            loger.writeLog(box + ": " + text);
-            window.ShowInTextBox(box, text);
+            _loger.writeLog(box + ": " + text);
+            _window.ShowInTextBox(box, text);
+            Thread.Sleep(1);
         }
 
         public void StartCycle()
         {
-            this.cyclicalRun = true;
+            _cyclicalRun = true;
         }
 
         public void StopCycle()
         {
-            this.cyclicalRun = false;
+            _cyclicalRun = false;
         }
 
         public void Close()
         {
-            this.cyclicalRun = false;
-            this.Work = false;
+            _cyclicalRun = false;
+            _work = false;
         }
     }
 }

@@ -18,24 +18,21 @@ namespace roboProg
     public partial class MainWindow : Window
     {
         private int _pace = 1000;
-        private bool teamCyclicalRun = false;
-        private string teamName;
-        private int indexOfSelectedThing;
-        private AllThingsJson.Rootobject allThings;
-        private Dictionary<string, string>[] thingsPropertyInServer;
-        private Dictionary<string, string>[] thingsPropertyInPolygon;
-        private List<string[]> teamSettings;
-        private RequestJson json;
-        private Dispatcher workDispatcher;
-        private Loger loger;
+        private bool _teamCyclicalRun = false;
+        private string _teamName;
+        private int _indexOfSelectedThing;
+        private AllThingsJson.Rootobject _allThings;
+        private Dictionary<string, string>[] _thingsPropertyInServer;
+        private Dictionary<string, string>[] _thingsPropertyInPolygon;
+        private List<string[]> _teamSettings;
+        private Loger _loger;
         public WorkCycle Work;
 
         #region Initialization
         public MainWindow()
         {
             InitializeComponent();
-            this.json = new RequestJson();
-            this.loger = Loger.getInstance();
+            _loger = Loger.getInstance();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -51,6 +48,7 @@ namespace roboProg
                 Work.Main(this);
             }));
             thread.Start();
+            Work.Pace = pace();
         }
 
         private void authorization()
@@ -99,11 +97,11 @@ namespace roboProg
 
         private void writeAllThing(string json)
         {
-            this.allThings = JsonConvert.DeserializeObject<AllThingsJson.Rootobject>(json);
-            if (this.allThings != null)
+            this._allThings = JsonConvert.DeserializeObject<AllThingsJson.Rootobject>(json);
+            if (_allThings != null)
             {
-                this.thingsPropertyInServer = new Dictionary<string, string>[this.allThings.rows.Length];
-                fullingThingList(this.allThings);
+                _thingsPropertyInServer = new Dictionary<string, string>[this._allThings.rows.Length];
+                fullingThingList(this._allThings);
             }
         }
 
@@ -135,7 +133,7 @@ namespace roboProg
             try
             {
                 teamInfo(teamName);
-                fullingTeamThingsList(this.teamSettings);
+                fullingTeamThingsList(this._teamSettings);
                 Work.TeamInfo(teamName);
             }
             catch (Exception exception)
@@ -154,20 +152,20 @@ namespace roboProg
         private void readTeamInfo(string teamName)
         {
             FileReader reader = new FileReader();
-            this.teamSettings = reader.itemInfo(teamName);
-            this.teamName = teamName;
+            _teamSettings = reader.itemInfo(teamName);
+            _teamName = teamName;
         }
 
         private void startButtonPrepare()
         {
-            TeamStart.Content = teamName;
+            TeamStart.Content = _teamName;
             TeamStart.IsEnabled = true;
         }
 
         private void preparePropertyFields()
         {
-            this.thingsPropertyInServer = new Dictionary<string, string>[teamSettings.Count];
-            this.thingsPropertyInPolygon = new Dictionary<string, string>[teamSettings.Count];
+            _thingsPropertyInServer = new Dictionary<string, string>[_teamSettings.Count];
+            _thingsPropertyInPolygon = new Dictionary<string, string>[_teamSettings.Count];
         }
 
         private void fullingTeamThingsList(List<string[]> teamList)
@@ -176,7 +174,7 @@ namespace roboProg
             for (int i = 0; i < count; i++)
             {
                 string[] thing = teamList[i];
-                this.TeamThingsList.Items.Add(thing[4]);
+                TeamThingsList.Items.Add(thing[4]);
             }
             TeamThingsList.SelectedIndex = 0;
         }
@@ -188,7 +186,7 @@ namespace roboProg
             StartTeamLogBoxWrite("start " + TeamStart.Content);
             if (checkFields())
             {
-                if (this.teamCyclicalRun) stopTeamCicleRequest();
+                if (_teamCyclicalRun) stopTeamCicleRequest();
                 else startTeamCicleRequest();
             }
         }
@@ -196,14 +194,16 @@ namespace roboProg
         private void startTeamCicleRequest()
         {
             TeamStart.Content = "STOP";
+            _teamCyclicalRun = true;
+            Work.SetAuthorizationData(authInfo(), address(), authorizationType());
             Work.StartCycle();
         }
 
         private void stopTeamCicleRequest()
         {
-            this.teamCyclicalRun = false;
+            _teamCyclicalRun = false;
             Work.StopCycle();
-            TeamStart.Content = this.teamName;
+            TeamStart.Content = this._teamName;
         }
 
         private int pace()
@@ -217,14 +217,13 @@ namespace roboProg
             }
             
             return _pace;
-
         }
 
         #region view property
         private void TeamThingsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            this.indexOfSelectedThing = TeamThingsList.SelectedIndex;
-            if (this.teamCyclicalRun)
+            _indexOfSelectedThing = TeamThingsList.SelectedIndex;
+            if (_teamCyclicalRun)
             {
                 fullingPropertyView();
             }
@@ -234,8 +233,8 @@ namespace roboProg
         private void fullingPropertyView()
         {
             paramFieldClin();
-            showProperty(PropertyInServiceViews, thingsPropertyInServer[indexOfSelectedThing]);
-            showProperty(PropertyInPolygonViews, thingsPropertyInPolygon[indexOfSelectedThing]);
+            showProperty(PropertyInServiceViews, _thingsPropertyInServer[_indexOfSelectedThing]);
+            showProperty(PropertyInPolygonViews, _thingsPropertyInPolygon[_indexOfSelectedThing]);
         }
 
         private void paramFieldClin()
@@ -372,56 +371,11 @@ namespace roboProg
         }
         #endregion
 
-        #region log
-        private void WriteErrorLogBox(string text)
-        {
-            ErrorLogBox.AppendText(text + Environment.NewLine);
-            ErrorLogBox.ScrollToEnd();
-            this.loger.writeLog(text);
-        }
-
-        private void StartTeamLogBoxWrite(string text)
-        {
-            StartTeamLogBox.AppendText(text + Environment.NewLine);
-            StartTeamLogBox.ScrollToEnd();
-            this.loger.writeLog(text);
-        }
-
-        private void ServerDatalog(string text)
-        {
-            ToServerLogBox.AppendText(text + Environment.NewLine);
-            ToServerLogBox.ScrollToEnd();
-            //writeLogBox(text);
-            this.loger.writeLog(text);
-        }
-
-        public void writeFromServerLogBox(string text)
-        {
-            FromServerLogBox.AppendText(text + Environment.NewLine);
-            FromServerLogBox.ScrollToEnd();
-        }
-
-        private void PoligonDataLog(string text)
-        {
-            writeUDPLogBox(text);
-            this.loger.writeLog(text);
-        }
-
-        public void writeUDPLogBox(string text)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                ToPoligonLogBox.AppendText(text + Environment.NewLine);
-                ToPoligonLogBox.ScrollToEnd();
-            });
-        }
-        #endregion
-
         #region initial button
         private void InitializationRecieveButton_Click(object sender, RoutedEventArgs e)
         {
             string[] literals = getLiters();
-            foreach(string[] thing in this.teamSettings)
+            foreach(string[] thing in _teamSettings)
             {
                 if (literals.Contains(thing[0].ToLower()))
                 {
@@ -460,7 +414,34 @@ namespace roboProg
             Work.Pace = pace();
         }
 
-        #region Window Interfase
+        #region log
+        private void WriteErrorLogBox(string text)
+        {
+            ErrorLogBox.AppendText(text + Environment.NewLine);
+            ErrorLogBox.ScrollToEnd();
+            _loger.writeLog(text);
+        }
+
+        private void StartTeamLogBoxWrite(string text)
+        {
+            StartTeamLogBox.AppendText(text + Environment.NewLine);
+            StartTeamLogBox.ScrollToEnd();
+            _loger.writeLog(text);
+        }
+
+        private void ServerDatalog(string text)
+        {
+            ToServerLogBox.AppendText(text + Environment.NewLine);
+            ToServerLogBox.ScrollToEnd();
+            _loger.writeLog(text);
+        }
+
+        public void writeFromServerLogBox(string text)
+        {
+            FromServerLogBox.AppendText(text + Environment.NewLine);
+            FromServerLogBox.ScrollToEnd();
+        }
+
         public void ShowInTextBox(string box, string text)
         {
             switch (box)
@@ -475,10 +456,10 @@ namespace roboProg
                     showDataFromServer(text);
                     break;
                 case "to poligon":
-                    showDataFromServer(text);
+                    showDataToPoligon(text);
                     break;
                 case "from poligon":
-                    showDataFromServer(text);
+                    showDataFromPoligon(text);
                     break;
             }
         }

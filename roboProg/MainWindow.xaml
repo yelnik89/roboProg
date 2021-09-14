@@ -37,10 +37,10 @@
         <Button x:Name="Team1" Content="Team 1" HorizontalAlignment="Left" Margin="1095,22,0,0" VerticalAlignment="Top" Width="75" Height="22" Click="Team1_Click"/>
         <Label x:Name="ThingNameLabel" Content="Название предмета" HorizontalAlignment="Left" Margin="765,90,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="SelectedThingName" HorizontalAlignment="Left" Height="19" Margin="890,94,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" IsReadOnly="True" BorderBrush="#FF7A7A7A"/>
-        <RichTextBox x:Name="PropertyInServiceViews" HorizontalAlignment="Left" Margin="765,160,0,0" Width="100" BorderBrush="#FF7A7A7A" IsReadOnly="True" Background="#FFF9F9F9" Height="527" VerticalAlignment="Top">
+        <RichTextBox x:Name="PropertyInServiceViews" HorizontalAlignment="Left" Margin="765,160,0,0" Width="100" BorderBrush="#FF7A7A7A" IsReadOnly="True" Background="#FFF9F9F9" Height="527" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display">
             <FlowDocument/>
         </RichTextBox>
-        <RichTextBox x:Name="PropertyInPolygonViews" HorizontalAlignment="Left" Margin="890,160,0,0" Width="100" BorderBrush="#FF7A7A7A" IsReadOnly="True" Height="527" VerticalAlignment="Top">
+        <RichTextBox x:Name="PropertyInPolygonViews" HorizontalAlignment="Left" Margin="890,160,0,0" Width="100" BorderBrush="#FF7A7A7A" IsReadOnly="True" Height="527" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display">
             <FlowDocument/>
         </RichTextBox>
         <RichTextBox x:Name="ToPoligonLogBox" Margin="327,160,0,0" BorderBrush="#FF7A7A7A" IsReadOnly="True" HorizontalAlignment="Left" Width="220" Background="#FFF9F9F9" TextOptions.TextFormattingMode="Display" Height="244" VerticalAlignment="Top">
