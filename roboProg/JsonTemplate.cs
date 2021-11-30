@@ -20,7 +20,7 @@ namespace roboProg
             "l1", "l2", "l3", "l4",
             "t1", "t2", "t3", "t4" };
 
-        private string[] remotTerminalPoligon = { "p", "b1", "b2", "b3", };
+        private string[] remotTerminalPoligon = { "p", "b1", "b2", "b3" };
 
 
 

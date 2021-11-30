@@ -19,9 +19,15 @@ namespace roboProg
     /// </summary>
     public partial class SettingsWindow : Window
     {
+        private readonly char[] _separators = { ' ', '.', ',', ':', ';', '-', '_', '!', '?', '*', '#', '(', ')', '"' };
+
         public SettingsWindow()
         {
             InitializeComponent();
+            if (SETTINGS.RobotSettings != null && SETTINGS.RobotSettings.Count != 0)
+                ViewRobotSettings();
+            else
+                NewTabControlItem();
         }
 
         #region events
@@ -30,7 +36,72 @@ namespace roboProg
             NewTabControlItem();
             SettingsRobotTabControl.SelectedIndex = SettingsRobotTabControl.Items.Count - 2;
         }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            TrySave();
+        }
+
+        private void SaveAndClose_Click(object sender, RoutedEventArgs e)
+        {
+            TrySave();
+            this.Close();
+        }
         #endregion
+
+        private void ViewRobotSettings()
+        {
+            RobotSettings[] robots = GetSettingsArray();
+            CreateTabs(robots.Count());
+            fullingTabs(robots);
+        }
+
+        private RobotSettings[] GetSettingsArray()
+        {
+            int i = 0;
+            RobotSettings[] robots = new RobotSettings[SETTINGS.RobotSettings.Count];
+
+            foreach (KeyValuePair<string, RobotSettings> pair in SETTINGS.RobotSettings)
+            {
+                robots[i] = pair.Value;
+                i++;
+            }
+
+            return robots;
+        }
+
+        private void CreateTabs(int count)
+        {
+            for (int i = 0; i < count; i++)
+                NewTabControlItem();
+        }
+
+        private void fullingTabs(RobotSettings[] robots)
+        {
+            for(int i = 0; i < robots.Count(); i++)
+            {
+                WriteSettingsInFields((TabItem)SettingsRobotTabControl.Items[i], robots[i]);
+            }
+        }
+
+        private void WriteSettingsInFields(TabItem tab, RobotSettings robot)
+        {
+            tab.Header = robot.Name;
+            Grid grid = (Grid)tab.Content;
+            TextBox keys = (TextBox)grid.Children[0];
+            keys.Text = robot.DataTemplateString();
+            TextBox name = (TextBox)grid.Children[1];
+            name.Text = robot.Name;
+            TextBox litera = (TextBox)grid.Children[2];
+            litera.Text = robot.Litera;
+            TextBox separator = (TextBox)grid.Children[3];
+            separator.Text = robot.Separator;
+        }
 
         private void NewTabControlItem()
         {
@@ -67,9 +138,9 @@ namespace roboProg
 
         private TextBox CreateJsonCharsPoligonBox()
         {
-            TextBox textBox = NewTextBox(217);
+            TextBox textBox = NewTextBox(217, 46);
             textBox.Margin = new Thickness(10, 90, 0, 0);
-            textBox.Name = "JsonCharsPoligon";
+            textBox.Name = "Keys";
             return textBox;
         }
 
@@ -77,7 +148,7 @@ namespace roboProg
         {
             TextBox textBox = NewTextBox(172);
             textBox.Margin = new Thickness(10, 35, 0, 0);
-            textBox.Name = "NameOfThing";
+            textBox.Name = "Name";
             return textBox;
         }
 
@@ -93,7 +164,7 @@ namespace roboProg
         {
             TextBox textBox = NewTextBox(30);
             textBox.Margin = new Thickness(277, 90, 0, 0);
-            textBox.Name = "Delimetr";
+            textBox.Name = "Separator";
             return textBox;
         }
 
@@ -158,5 +229,56 @@ namespace roboProg
             return label;
         }
         #endregion
+
+
+        private void TrySave()
+        {
+            try
+            {
+                SaveData();
+            }
+            catch (Exception error)
+            {
+                MessageBox.Show("field " + error.Message + " is empty");
+            }
+        }
+
+        private void SaveData()
+        {
+            foreach (TabItem tabItem in SettingsRobotTabControl.Items)
+            {
+                if (tabItem.Content == null) continue;
+                SETTINGS.SetRobotSettings(GetRobotSettings(tabItem));
+            }
+            FileWriter writer = new FileWriter();
+            writer.SaveRobotSettings();
+        }
+
+        private RobotSettings GetRobotSettings(TabItem tabItem)
+        {
+            string[] settings = new string[4];
+
+            for (int i = 0; i < 4; i++)
+            {
+                settings[i] = GetStringInTextBox(tabItem, i);
+            }
+
+            return new RobotSettings(settings[1], settings[2], settings[3], getLiters(settings[0]));
+        }
+
+        private string GetStringInTextBox(TabItem tabItem, int index)
+        {
+            Grid grid = (Grid)tabItem.Content;
+            TextBox charsBox = (TextBox)grid.Children[index];
+            string result = charsBox.Text;
+            if (result.Equals("")) throw new Exception(charsBox.Name);
+            return result;
+        }
+
+        private string[] getLiters(string str)
+        {
+            string[] literals = str.ToLower().Split(_separators, StringSplitOptions.RemoveEmptyEntries);
+            return literals;
+        }
     }
 }

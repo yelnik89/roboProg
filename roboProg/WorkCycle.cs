@@ -20,7 +20,6 @@ namespace roboProg
         private MainWindow _window;
         private bool _work;
         private int _pace;
-        private Dispatcher _dispatcher;
         private string[] _authorizationData = new string[3];
         private bool _cyclicalRun = false;
         private Dictionary<string, string>[] _thingsPropertyInServer;
@@ -35,10 +34,9 @@ namespace roboProg
         public void Main(MainWindow window)
         {
             _window = window;
-            _loger = Loger.getInstance();
+            _loger = Loger.GetInstance();
             _json = new JsonTemplate();
             _work = true;
-            _dispatcher = Dispatcher.CurrentDispatcher;
             WorkMethod();
         }
 
@@ -132,11 +130,6 @@ namespace roboProg
             _thingsPropertyInPolygon[indexOfThing] = convertData.getDictionary(data);
         }
         #endregion
-
-        public Dispatcher getDispatcher()
-        {
-            return _dispatcher;
-        }
 
         public void TeamInfo(string teamName)
         {
@@ -257,14 +250,14 @@ namespace roboProg
             if (_thingsPropertyInPolygon[indexOfThing] != null)
             {
                 string json = JsonConvert.SerializeObject(_thingsPropertyInPolygon[indexOfThing]);
-                sendToWindowTextBox(_toServer, _teamSettings[indexOfThing][4] + json);
+                sendToWindowTextBox(_toServer, _teamSettings[indexOfThing][4] + " " + json);
                 await messenger.reqestToService(_teamSettings[indexOfThing][4], _teamSettings[indexOfThing][5], json);
             }
         }
 
         private void sendToWindowTextBox(string box, string text)
         {
-            _loger.writeLog(box + ": " + text);
+            _loger.WriteLog(box + ": " + text);
             _window.ShowInTextBox(box, text);
             Thread.Sleep(1);
         }

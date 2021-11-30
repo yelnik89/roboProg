@@ -62,15 +62,19 @@
     <Compile Include="AllThingsJson.cs" />
     <Compile Include="FileReader.cs" />
     <Compile Include="ConvertDataToSave.cs" />
+    <Compile Include="FileWriter.cs" />
     <Compile Include="JsonTemplate.cs" />
     <Compile Include="Loger.cs" />
     <Compile Include="Messenger.cs" />
+    <Compile Include="RobotSettings.cs" />
+    <Compile Include="SETTINGS.cs" />
     <Compile Include="SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="UDPReciever.cs" />
     <Compile Include="UDPSendler.cs" />
     <Compile Include="WorkCycle.cs" />
+    <Compile Include="WorkPrepare.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

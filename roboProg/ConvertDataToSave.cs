@@ -8,69 +8,62 @@ namespace roboProg
 {
     public class ConvertDataToSave
     {
-        private char[] separators = { ':'};
-        private string litera;
-        private string whereTo;
-        private string[] template;
+        private char[] _separators;
+        private string _litera;
+        private string _whereTo;
+        private string[] _template;
 
 
         public ConvertDataToSave(string litera, string whereTo)
         {
-            this.litera = litera;
-            this.whereTo = whereTo;
+            _litera = litera;
+            _whereTo = whereTo;
             setTemplate();
-        }
-        
-        public Dictionary<string, string> getDictionary(string data)
-        {
-            Dictionary<string, string> propertyDictionary = new Dictionary<string, string>();
-            propertyDictionary = preparationData(data);
-            return propertyDictionary;
         }
 
         private void setTemplate()
         {
-            JsonTemplate template = new JsonTemplate();
-            if (this.whereTo.Equals("poligon"))
+            if (_whereTo.Equals("poligon"))
             {
-                this.template = template.getTemplateFromPoligon(this.litera);
+                RobotSettings robotSettings = SETTINGS.GetRobotByLitera(this._litera);
+                _template = robotSettings.DataTemplate;
+                _separators = new char[] { Convert.ToChar(robotSettings.Separator) };
             }
-            else this.template = new string[] { };
+            else _template = new string[] { };
+        }
+
+        public Dictionary<string, string> getDictionary(string data)
+        {
+            Dictionary<string, string> propertyDictionary = preparationData(data);
+            return propertyDictionary;
         }
 
         private Dictionary<string, string> preparationData(string data)
-        {
-            return politasierFromPoligon(data);
-        }
-
-        private Dictionary<string, string> politasierFromPoligon(string data)
         {
             char[] separator = { '\n' };
             string[] dataStrings = splitString(data, separator);
             return fullDicrionary(dataStrings);
         }
 
-        private string[] splitString(string dataString, char[] separator)
-        {
-            string[] dataStrings = dataString.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-            return dataStrings;
-        }
-
         private Dictionary<string, string> fullDicrionary(string[] data)
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>();
-            char[] separator = { ':' };
 
-            foreach (string dataString in data)
-            {
-                string str = trimer(dataString);
-                string[] propertys = splitString(str, separator);
-                dictionary = writeProperty(propertys, dictionary);
-            }
+            WriteDataInDictionary(dictionary, data);
 
             dictionary = writeStatus(dictionary, data[0]);
 
             return dictionary;
+        }
+
+        private void WriteDataInDictionary(Dictionary<string, string> dictionary, string[] data)
+        {
+            foreach (string dataString in data)
+            {
+                string str = trimer(dataString);
+                string[] propertys = splitString(str, _separators);
+                dictionary = writeProperty(propertys, dictionary);
+            }
         }
 
         private Dictionary<string, string> writeProperty(string[] propertys, Dictionary<string, string> dictionary)
@@ -79,7 +72,7 @@ namespace roboProg
             for (int i = 4; i < j; i++)
             {
                 string key = propertys[0].ToLower() + (i - 3);
-                if (this.template.Contains(key))
+                if (_template.Contains(key))
                     dictionary.Add(key, propertys[i]);
             }
             return dictionary;
@@ -90,6 +83,12 @@ namespace roboProg
             dictionary.Add("s", data[2].ToString());
             dictionary.Add("n", data[3].ToString());
             return dictionary;
+        }
+
+        private string[] splitString(string dataString, char[] separator)
+        {
+            string[] dataStrings = dataString.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+            return dataStrings;
         }
 
         private string trimer(string s)

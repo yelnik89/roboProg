@@ -5,30 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:roboProg"
         mc:Ignorable="d"
-        Title="SettingsWindow" Height="222" Width="489">
-    <Grid Background="#FFF0F0F0" Margin="0,0,2,2">
-        <TabControl x:Name="SettingsRobotTabControl" Background="#FFA0A0A0" HorizontalAlignment="Left" Width="480" Margin="0,0,-1,0">
-            <TabItem Header="New Robot">
-                <Grid Background="#FFE5E5E5" Name="SettingsGrid" Margin="0,0,1,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="NameOfThingBox" HorizontalAlignment="Left" Height="23" Margin="10,35,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="172"/>
-                    <TextBox x:Name="LiteraBox" HorizontalAlignment="Left" Height="23" Margin="277,30,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="30"/>
-                    <Label x:Name="LiteraLabel" Content="Litera" HorizontalAlignment="Left" Margin="268,3,0,0" VerticalAlignment="Top" Height="27"/>
-                    <TextBox x:Name="JsonCharsPoligonBox" HorizontalAlignment="Left" Height="23" Margin="10,90,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="217"/>
-                    <Label x:Name="DelimetrLabel" Content="Separator" HorizontalAlignment="Left" Margin="261,64,0,0" VerticalAlignment="Top" Height="27"/>
-                    <TextBox x:Name="DelimetrBox" HorizontalAlignment="Left" Height="23" Margin="277,90,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="30"/>
-                    <Label x:Name="JsonCharsPoligonLabel" Content="Keys" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top" Width="147"/>
-                    <Label x:Name="RobotNameLabel" Content="Robot name" HorizontalAlignment="Left" Margin="10,9,0,0" VerticalAlignment="Top" Width="147"/>
-                </Grid>
-            </TabItem>
-            <TabItem Content="" Header="+" MouseLeftButtonUp="TabItem_MouseLeftButtonUp">
-
+        Title="SettingsWindow" Height="222" Width="499">
+    <Grid Background="#FFF0F0F0" Margin="0,0,1,2">
+        <TabControl x:Name="SettingsRobotTabControl" Background="#FFA0A0A0" HorizontalAlignment="Left" Width="479" Margin="1,0,0,0">
+            <TabItem Header="+" MouseLeftButtonUp="TabItem_MouseLeftButtonUp">
             </TabItem>
         </TabControl>
-        <Button x:Name="Save" Content="Save" HorizontalAlignment="Left" Margin="365,45,0,0" VerticalAlignment="Top" Width="90" RenderTransformOrigin="0,0.5" Height="25"/>
-        <Button x:Name="Cancel" Content="Cancel" HorizontalAlignment="Left" Margin="365,150,0,0" VerticalAlignment="Top" Width="90" RenderTransformOrigin="0,0.5" Height="25"/>
-        <Button x:Name="SaveAndClose" Content="OK" HorizontalAlignment="Left" Margin="365,110,0,0" VerticalAlignment="Top" Width="90" RenderTransformOrigin="0,0.5" Height="25"/>
+        <Button x:Name="Save" Content="Save" HorizontalAlignment="Left" Margin="365,45,0,0" VerticalAlignment="Top" Width="90" RenderTransformOrigin="0,0.5" Height="25" Click="Save_Click"/>
+        <Button x:Name="Cancel" Content="Cancel" HorizontalAlignment="Left" Margin="365,140,0,0" VerticalAlignment="Top" Width="90" RenderTransformOrigin="0,0.5" Height="25" Click="Cancel_Click"/>
+        <Button x:Name="SaveAndClose" Content="OK" HorizontalAlignment="Left" Margin="365,100,0,0" VerticalAlignment="Top" Width="90" RenderTransformOrigin="0,0.5" Height="25" Click="SaveAndClose_Click"/>
     </Grid>
 </Window>

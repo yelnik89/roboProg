@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
-
-using System.Windows.Threading;
 
 namespace roboProg
 {
@@ -19,10 +15,10 @@ namespace roboProg
 
         private Loger()
         {
-            prepareLogsFolders();
+            PrepareLogsFolders();
         }
 
-        public static Loger getInstance()
+        public static Loger GetInstance()
         {
             if (loger == null)
                 loger = new Loger();
@@ -30,16 +26,16 @@ namespace roboProg
         }
 
 
-        public void writeLog(string text)
+        public void WriteLog(string text)
         {
-            using (FileStream file = new FileStream(LOGFOLDER + "/" + logFile(), FileMode.Append))
+            using (FileStream file = new FileStream(LOGFOLDER + "/" + LogFile(), FileMode.Append))
             {
                 byte[] array = prepareText(text);
                 file.Write(array, 0, array.Length);
             }
         }
 
-        private string logFile()
+        private string LogFile()
         {
             return DateTime.Today.ToShortDateString() + FILENAME + FORMAT;
         }
@@ -52,13 +48,13 @@ namespace roboProg
             return array;
         }
 
-        private void prepareLogsFolders()
+        private void PrepareLogsFolders()
         {
-            checkAndCreateLogsDirectory();
-            moveOldLogs();
+            CheckAndCreateLogsDirectory();
+            MoveOldLogs();
         }
 
-        private void checkAndCreateLogsDirectory()
+        private void CheckAndCreateLogsDirectory()
         {
             DirectoryInfo logsDirInfo = new DirectoryInfo(LOGFOLDER);
             DirectoryInfo oldLogsDirInfo = new DirectoryInfo(LOGFOLDER + "/" + OLDLOGSFOLDER);
@@ -66,13 +62,13 @@ namespace roboProg
             if (!oldLogsDirInfo.Exists) oldLogsDirInfo.Create();
         }
 
-        private void moveOldLogs()
+        private void MoveOldLogs()
         {
             DirectoryInfo logsDirInfo = new DirectoryInfo(LOGFOLDER);
             FileInfo[] logsFiles = logsDirInfo.GetFiles();
             foreach (FileInfo file in logsFiles)
             {
-                if (!file.Name.Equals(logFile())) file.MoveTo(LOGFOLDER + "/" + OLDLOGSFOLDER + "/" + file.Name);
+                if (!file.Name.Equals(LogFile())) file.MoveTo(LOGFOLDER + "/" + OLDLOGSFOLDER + "/" + file.Name);
             }
         }
     }

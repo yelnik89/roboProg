@@ -118,8 +118,8 @@ namespace roboProg
 
         private void log(string text)
         {
-            Loger loger = Loger.getInstance();
-            loger.writeLog(text);
+            Loger loger = Loger.GetInstance();
+            loger.WriteLog(text);
         }
     }
 }

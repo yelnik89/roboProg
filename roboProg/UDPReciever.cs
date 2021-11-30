@@ -40,7 +40,7 @@ namespace roboProg
                 }
             }catch(Exception e)
             {
-                Loger.getInstance().writeLog(e.Message);
+                Loger.GetInstance().WriteLog(e.Message);
                 string[] result = { e.Message, remoteIpEndPoint.ToString() };
                 return result;
             }

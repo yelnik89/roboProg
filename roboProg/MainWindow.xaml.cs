@@ -31,8 +31,9 @@ namespace roboProg
         #region Initialization
         public MainWindow()
         {
+            new WorkPrepare();
             InitializeComponent();
-            _loger = Loger.getInstance();
+            _loger = Loger.GetInstance();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -417,29 +418,22 @@ namespace roboProg
         #region log
         private void WriteErrorLogBox(string text)
         {
-            ErrorLogBox.AppendText(text + Environment.NewLine);
-            ErrorLogBox.ScrollToEnd();
-            _loger.writeLog(text);
+            ShowText(ErrorLogBox, text);
         }
 
         private void StartTeamLogBoxWrite(string text)
         {
-            StartTeamLogBox.AppendText(text + Environment.NewLine);
-            StartTeamLogBox.ScrollToEnd();
-            _loger.writeLog(text);
+            ShowText(StartTeamLogBox, text);
         }
 
         private void ServerDatalog(string text)
         {
-            ToServerLogBox.AppendText(text + Environment.NewLine);
-            ToServerLogBox.ScrollToEnd();
-            _loger.writeLog(text);
+            ShowText(ToServerLogBox, text);
         }
 
         public void writeFromServerLogBox(string text)
         {
-            FromServerLogBox.AppendText(text + Environment.NewLine);
-            FromServerLogBox.ScrollToEnd();
+            ShowText(FromServerLogBox, text, false);
         }
 
         public void ShowInTextBox(string box, string text)
@@ -491,9 +485,16 @@ namespace roboProg
         {
             Dispatcher.Invoke(() =>
             {
-                textBox.AppendText(text + Environment.NewLine);
-                textBox.ScrollToEnd();
+                ShowText(textBox, text, false);
             });
+        }
+
+        private void ShowText(RichTextBox textBox, string text, bool log = true)
+        {
+            textBox.AppendText(text + Environment.NewLine);
+            textBox.ScrollToEnd();
+
+            if (log) _loger.WriteLog(text);
         }
         #endregion
     }
