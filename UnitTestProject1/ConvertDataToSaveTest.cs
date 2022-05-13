@@ -17,7 +17,7 @@ namespace RoboProgTests
         {
             ConvertDataToSave convertData = new ConvertDataToSave("P", "poligon");
             string politaserStingFromPoligon = "";
-            convertData.getDictionary(politaserStingFromPoligon);
+            convertData.GetDictionary(politaserStingFromPoligon);
         }
     }
 }

@@ -127,7 +127,7 @@ namespace roboProg
         private void writeProperty(int indexOfThing, string data)
         {
             ConvertDataToSave convertData = new ConvertDataToSave(_teamSettings[indexOfThing][0], "poligon");
-            _thingsPropertyInPolygon[indexOfThing] = convertData.getDictionary(data);
+            _thingsPropertyInPolygon[indexOfThing] = convertData.GetDictionary(data);
         }
         #endregion
 

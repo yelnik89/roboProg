@@ -18,10 +18,10 @@ namespace roboProg
         {
             _litera = litera;
             _whereTo = whereTo;
-            setTemplate();
+            SetTemplate();
         }
 
-        private void setTemplate()
+        private void SetTemplate()
         {
             if (_whereTo.Equals("poligon"))
             {
@@ -32,26 +32,19 @@ namespace roboProg
             else _template = new string[] { };
         }
 
-        public Dictionary<string, string> getDictionary(string data)
+        public Dictionary<string, string> GetDictionary(string data)
         {
-            Dictionary<string, string> propertyDictionary = preparationData(data);
-            return propertyDictionary;
+            string[] dataStrings = SplitString(data, new char[] { '\n' });
+            return FillDicrionary(dataStrings);
         }
 
-        private Dictionary<string, string> preparationData(string data)
-        {
-            char[] separator = { '\n' };
-            string[] dataStrings = splitString(data, separator);
-            return fullDicrionary(dataStrings);
-        }
-
-        private Dictionary<string, string> fullDicrionary(string[] data)
+        private Dictionary<string, string> FillDicrionary(string[] data)
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>();
 
             WriteDataInDictionary(dictionary, data);
 
-            dictionary = writeStatus(dictionary, data[0]);
+            dictionary = WriteStatus(dictionary, data[0]);
 
             return dictionary;
         }
@@ -61,12 +54,12 @@ namespace roboProg
             foreach (string dataString in data)
             {
                 string str = trimer(dataString);
-                string[] propertys = splitString(str, _separators);
-                dictionary = writeProperty(propertys, dictionary);
+                string[] propertys = SplitString(str, _separators);
+                dictionary = WriteProperty(propertys, dictionary);
             }
         }
 
-        private Dictionary<string, string> writeProperty(string[] propertys, Dictionary<string, string> dictionary)
+        private Dictionary<string, string> WriteProperty(string[] propertys, Dictionary<string, string> dictionary)
         {
             int j = propertys.Length;
             for (int i = 4; i < j; i++)
@@ -78,14 +71,14 @@ namespace roboProg
             return dictionary;
         }
 
-        private Dictionary<string, string> writeStatus(Dictionary<string, string> dictionary, string data)
+        private Dictionary<string, string> WriteStatus(Dictionary<string, string> dictionary, string data)
         {
             dictionary.Add("s", data[2].ToString());
             dictionary.Add("n", data[3].ToString());
             return dictionary;
         }
 
-        private string[] splitString(string dataString, char[] separator)
+        private string[] SplitString(string dataString, char[] separator)
         {
             string[] dataStrings = dataString.Split(separator, StringSplitOptions.RemoveEmptyEntries);
             return dataStrings;
